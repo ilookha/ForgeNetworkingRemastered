@@ -96,8 +96,9 @@ namespace MasterServer
 				else if (data["get"] != null)
 					Get(player, data["get"]);
 			}
-			catch
+			catch (Exception e)
 			{
+				Log(e);
 				// Ignore the message and disocnnect the requester
 				server.Disconnect(player, true);
 			}
@@ -125,10 +126,10 @@ namespace MasterServer
 				Port = port,
 				MaxPlayers = maxPlayers,
 				PlayerCount = playerCount,
-				Comment = comment,
-				Id = gameId,
-				Type = gameType,
-				Mode = mode,
+				Comment = comment ?? string.Empty,
+				Id = gameId ?? string.Empty,
+				Type = gameType ?? string.Empty,
+				Mode = mode ?? string.Empty,
 				Protocol = protocol,
 				Player = player,
 				Elo = elo,
@@ -153,12 +154,9 @@ namespace MasterServer
 				if (hosts[i].Address == address && hosts[i].Port == port)
 				{
 					Host host = hosts[i];
-					if(comment != null)
-                        host.Comment = comment;
-					if(gameType != null)
-                        host.Type = gameType;
-					if (mode != null)
-                        host.Mode = mode;
+                    host.Comment = comment ?? string.Empty;
+                    host.Type = gameType ?? string.Empty;
+                    host.Mode = mode ?? string.Empty;
 					host.PlayerCount = playerCount;
 
 					hosts[i] = host;

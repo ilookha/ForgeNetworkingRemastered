@@ -130,23 +130,9 @@ namespace BeardedManStudios.MultiplayerMenu
 				return;
 			}
 
-			NetWorker client;
-
-			if (Settings.useTCP)
-			{
-				client = new TCPClient();
-				((TCPClient)client).Connect(ipAddress.text, (ushort)port);
-			}
-			else
-			{
-				client = new UDPClient();
-				if (Settings.natServerHost.Trim().Length == 0)
-					((UDPClient)client).Connect(ipAddress.text, (ushort)port);
-				else
-					((UDPClient)client).Connect(ipAddress.text, (ushort)port, Settings.natServerHost, Settings.natServerPort);
-			}
-
-			Connected(client);
+            MasterServerResponse.Server serverDescription = new MasterServerResponse.Server(ipAddress.text, (ushort)port);
+            NetworkManager.Instance.StartClient(serverDescription);
+			Connected(NetworkManager.Instance.Networker);
 		}
 
 		public void ConnectToMatchmaking()
@@ -161,8 +147,7 @@ namespace BeardedManStudios.MultiplayerMenu
 				throw new System.Exception("A network manager was not provided, this is required for the tons of fancy stuff");
 
 			mgr = Instantiate(networkManager).GetComponent<NetworkManager>();
-
-			mgr.MatchmakingServersFromMasterServer(Settings.masterServerHost, Settings.masterServerPort, Settings.myElo, (response) =>
+            mgr.StartMasterServerClient((response) => 
 			{
 				_matchmaking = false;
 				SetToggledButtons(true);
@@ -172,39 +157,18 @@ namespace BeardedManStudios.MultiplayerMenu
 				// I just make it randomly pick a server... you can do whatever you please!
 				if (response != null && response.serverResponse.Count > 0)
 				{
-					MasterServerResponse.Server server = response.serverResponse[Random.Range(0, response.serverResponse.Count)];
-					//TCPClient client = new TCPClient();
-					UDPClient client = new UDPClient();
-					client.Connect(server.Address, server.Port);
-					Connected(client);
+					MasterServerResponse.Server serverEntry = response.serverResponse[Random.Range(0, response.serverResponse.Count)];
+                    mgr.StartClient(serverEntry);
+					Connected(mgr.Networker);
 				}
 			});
 		}
 
 		public void Host()
 		{
-			if (Settings.useTCP)
-			{
-				server = new TCPServer(64);
-				((TCPServer)server).Connect();
-			}
-			else
-			{
-				server = new UDPServer(64);
+            NetworkManager.Instance.StartServer();
 
-				if (Settings.natServerHost.Trim().Length == 0)
-					((UDPServer)server).Connect(ipAddress.text, ushort.Parse(portNumber.text));
-				else
-					((UDPServer)server).Connect(port: ushort.Parse(portNumber.text), natHost: Settings.natServerHost, natPort: Settings.natServerPort);
-			}
-
-			server.playerTimeout += (player, sender) =>
-			{
-				Debug.Log("Player " + player.NetworkId + " timed out");
-			};
-			//LobbyService.Instance.Initialize(server);
-
-			Connected(server);
+			Connected(NetworkManager.Instance.Networker);
 		}
 
 		private void Update()
@@ -242,15 +206,6 @@ namespace BeardedManStudios.MultiplayerMenu
 			}
 			else if (mgr == null)
 				mgr = Instantiate(networkManager).GetComponent<NetworkManager>();
-
-			// If we are using the master server we need to get the registration data
-			JSONNode masterServerData = null;
-			if (!string.IsNullOrEmpty(Settings.masterServerHost))
-			{
-				masterServerData = mgr.MasterServerRegisterData(networker, Settings.serverId, Settings.serverName, Settings.type, Settings.mode, Settings.comment, Settings.useElo, Settings.eloRequired);
-			}
-
-			mgr.Initialize(networker, Settings.masterServerHost, Settings.masterServerPort, masterServerData);
 
 			if (Settings.useInlineChat && networker.IsServer)
 				SceneManager.sceneLoaded += CreateInlineChat;

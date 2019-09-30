@@ -14,6 +14,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 
 		public int TempAttachCode { get; set; }
 		public bool Initialized { get; private set; }
+		public int SceneId { get { return gameObject.scene.buildIndex; } }
 
 		private NetworkObject waitingForNetworkObject;
 		private uint waitingForNetworkObjectOffset;

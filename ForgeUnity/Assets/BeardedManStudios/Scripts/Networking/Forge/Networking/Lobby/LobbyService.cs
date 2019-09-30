@@ -19,8 +19,8 @@ namespace BeardedManStudios.Forge.Networking.Lobby
 		public const byte RPC_PLAYER_LEFT = 9;
 		public const byte RPC_PLAYER_SYNC = 10;
 
-		#region Private Data
-		private LobbyServiceNetworkObject networkObject = null;
+        #region Private Data
+        private LobbyServiceNetworkObject networkObject = null;
 		private bool _initialized;
 		#endregion
 
@@ -460,10 +460,14 @@ namespace BeardedManStudios.Forge.Networking.Lobby
 		{
 			return networkObject.MyPlayerId == id;
 		}
-		#endregion
+        #endregion
 
-		#region Network Behavior
-		public void Initialize(NetworkObject obj)
+        #region Network Behavior
+        public int TempAttachCode { get; set; }
+
+        public int SceneId { get { return -1; } }
+
+        public void Initialize(NetworkObject obj)
 		{
 			// We have already initialized this object
 			if (_initialized)

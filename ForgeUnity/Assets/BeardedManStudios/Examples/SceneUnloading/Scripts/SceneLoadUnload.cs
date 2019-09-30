@@ -24,7 +24,7 @@ public class SceneLoadUnload : MonoBehaviour
 			}
 			else
 			{
-				NetworkManager.Instance.UnloadSceneAdditive(sceneName);
+				NetworkManager.Instance.Server.OnSceneRemoved(scene.buildIndex);
 			}
 		}
 
@@ -38,7 +38,7 @@ public class SceneLoadUnload : MonoBehaviour
 			}
 			else
 			{
-				NetworkManager.Instance.UnloadSceneAdditive(sceneName);
+				NetworkManager.Instance.Server.OnSceneRemoved(scene.buildIndex);
 			}
 		}
 	}

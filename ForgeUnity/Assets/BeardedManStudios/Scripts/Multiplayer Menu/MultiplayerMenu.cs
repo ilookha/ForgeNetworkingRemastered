@@ -86,6 +86,8 @@ namespace BeardedManStudios.MultiplayerMenu
 			ipAddress.text = "127.0.0.1";
 			portNumber.text = "15937";
 
+			mgr = Instantiate(networkManager).GetComponent<NetworkManager>();
+
 			JoinMenu = GetComponent<JoinMenu>();
 
 			for (int i = 0; i < ToggledButtons.Length; ++i)
@@ -130,7 +132,7 @@ namespace BeardedManStudios.MultiplayerMenu
 				return;
 			}
 
-            MasterServerResponse.Server serverDescription = new MasterServerResponse.Server(ipAddress.text, (ushort)port);
+            MasterServerResponse.Server serverDescription = new MasterServerResponse.Server(ipAddress.text, (ushort)port, "udp");
             NetworkManager.Instance.StartClient(serverDescription);
 			Connected(NetworkManager.Instance.Networker);
 		}
@@ -146,7 +148,6 @@ namespace BeardedManStudios.MultiplayerMenu
 			if (mgr == null && networkManager == null)
 				throw new System.Exception("A network manager was not provided, this is required for the tons of fancy stuff");
 
-			mgr = Instantiate(networkManager).GetComponent<NetworkManager>();
             mgr.StartMasterServerClient((response) => 
 			{
 				_matchmaking = false;

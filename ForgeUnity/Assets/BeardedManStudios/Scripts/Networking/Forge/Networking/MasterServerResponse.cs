@@ -21,7 +21,7 @@ namespace BeardedManStudios.Forge.Networking
 			public bool UseElo;
 			public int EloDelta;
 
-			public Server(string addr, ushort port)
+			public Server(string addr, ushort port, string protocol)
 			{
 				Name = string.Empty;
 				Address = addr;
@@ -31,7 +31,7 @@ namespace BeardedManStudios.Forge.Networking
 				Mode = string.Empty;
 				PlayerCount = 0;
 				MaxPlayers = 0;
-				Protocol = string.Empty;
+				Protocol = protocol;
 				Elo = 0;
 				UseElo = false;
 				EloDelta = 0;

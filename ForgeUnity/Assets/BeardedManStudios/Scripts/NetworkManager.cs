@@ -38,7 +38,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
     }
 
     /**
-     * Provides Unity-specific interface to ForgeGame Client and Server.
+     * Provides Unity-specific interface to GameClient and GameServer.
      **/
     public partial class NetworkManager : MonoBehaviour
 	{
@@ -58,13 +58,17 @@ namespace BeardedManStudios.Forge.Networking.Unity
         // Internals
         private NetworkSettings _networkSettings;
         private UnityNetworkBehaviourManager _behaviourManager;
+		private ObjectMapper objectMapper;
 
         public void StartClient(MasterServerResponse.Server serverDescription)
         {
             Client = new GameClient(_networkSettings, _behaviourManager, new NetworkObjectFactory(), MainThreadManager.Instance, serverDescription);
-        }
+			Client.ResetSceneHandler += HandleSceneReset;
+			Client.AddSceneHandler += HandleSceneAdd;
+			Client.RemoveSceneHandler += HandleSceneRemove;
+		}
 
-        public void StartServer()
+		public void StartServer()
         {
             Server = new GameServer(_networkSettings, _behaviourManager, new NetworkObjectFactory());
         }
@@ -117,6 +121,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			}
 
             _behaviourManager = new UnityNetworkBehaviourManager();
+			UnityObjectMapper.CreateInstance();
 
             // Convert Unity-specific ForgeSettings to base-level NetworkSettings
             _networkSettings = new NetworkSettings()
@@ -171,6 +176,24 @@ namespace BeardedManStudios.Forge.Networking.Unity
             {
                 Server.Update();
             }
+		}
+
+		// Handle server request to reset current scene (load single)
+		protected virtual void HandleSceneReset(int sceneId)
+		{
+			SceneManager.LoadSceneAsync(sceneId, LoadSceneMode.Single);
+		}
+
+		// Handle server request to load a scene additively
+		protected virtual void HandleSceneAdd(int sceneId)
+		{
+			SceneManager.LoadSceneAsync(sceneId, LoadSceneMode.Additive);
+		}
+
+		// Handle server request to unload a scene
+		protected virtual void HandleSceneRemove(int sceneId)
+		{
+			SceneManager.UnloadSceneAsync(sceneId);
 		}
 
 		protected virtual void SceneLoaded(Scene scene, LoadSceneMode mode)

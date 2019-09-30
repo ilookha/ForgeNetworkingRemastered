@@ -341,15 +341,23 @@ namespace BeardedManStudios.Forge.Managers
 		{
             BMSLog.LogFormat("GameServer: PlayerAcceptedSceneSetup {0}", player.ToString());
 
-			BMSByte data = ObjectMapper.BMSByte(loadedScenes.Count);
-
 			// Go through all the loaded scene indexes and send them to the connecting player
 			for (int i = 0; i < loadedScenes.Count; i++)
-				ObjectMapper.Instance.MapBytes(data, loadedScenes[i]);
-
-			Binary frame = new Binary(sender.Time.Timestep, false, data, Receivers.Target, MessageGroupIds.VIEW_INITIALIZE, sender is BaseTCP);
-
-			SendFrame(sender, frame, player);
+			{
+				// Consider the first loaded scene to be non-additive
+				if (i == 0)
+				{
+					BMSByte data = ObjectMapper.BMSByte(loadedScenes[i], (int)ViewUpdateMode.Reset);
+					Binary frame = new Binary(Networker.Time.Timestep, false, data, Receivers.Target, MessageGroupIds.VIEW_INITIALIZE, Networker is BaseTCP);
+					SendFrame(sender, frame, player);
+				}
+				else
+				{
+					BMSByte data = ObjectMapper.BMSByte(loadedScenes[i], (int)ViewUpdateMode.Add);
+					Binary frame = new Binary(Networker.Time.Timestep, false, data, Receivers.Target, MessageGroupIds.VIEW_CHANGE, Networker is BaseTCP);
+					SendFrame(sender, frame, player);
+				}
+			}
 		}
 
 		protected virtual void ReadBinary(NetworkingPlayer player, Binary frame, NetWorker sender)
@@ -408,7 +416,9 @@ namespace BeardedManStudios.Forge.Managers
             pendingNetworkObjects.Clear();
             loadedScenes.Clear();
 
-            BMSByte data = ObjectMapper.BMSByte(sceneId, (int)ViewUpdateMode.Reset);
+			loadedScenes.Add(sceneId);
+
+			BMSByte data = ObjectMapper.BMSByte(sceneId, (int)ViewUpdateMode.Reset);
             Binary frame = new Binary(Networker.Time.Timestep, false, data, Receivers.All, MessageGroupIds.VIEW_INITIALIZE, Networker is BaseTCP);
 
             SendFrame(Networker, frame);

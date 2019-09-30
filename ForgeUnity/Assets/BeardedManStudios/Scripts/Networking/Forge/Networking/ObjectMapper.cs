@@ -10,24 +10,22 @@ namespace BeardedManStudios.Forge.Networking
 {
 	public class ObjectMapper
 	{
-		protected static ObjectMapper instance = null;
 		public static ObjectMapper Instance
 		{
-			get
-			{
-				if (instance != null)
-					return instance;
+			get; protected set;
+		}
 
-				instance = new ObjectMapper();
-				return instance;
-			}
+		public static void CreateInstance()
+		{
+			if (Instance != null && Instance.GetType() != typeof(ObjectMapper))
+				throw new Exception("ObjectMapper instance already exists");
+
+			Instance = new ObjectMapper();
 		}
 
 		protected ObjectMapper() { }
 
 		protected int byteArrSize, size = 0;
-
-		public void UseAsDefault() { instance = this; }
 
 		/// <summary>
 		/// Map a type of object from a BMSByte to a object
@@ -61,25 +59,9 @@ namespace BeardedManStudios.Forge.Networking
 		/// <typeparam name="T">Value to get out of it</typeparam>
 		/// <param name="stream">BMSByte to be used</param>
 		/// <returns>Returns a mapped value from the BMSByte</returns>
-		public virtual T Map<T>(BMSByte stream)
+		public T Map<T>(BMSByte stream)
 		{
-			object obj = null;
-			var genericType = typeof(T);
-
-			if (genericType == typeof(string))
-				obj = stream.GetBasicType<string>();
-			else if (genericType == typeof(Vector))
-				obj = stream.GetBasicType<Vector>();
-			else if (genericType.IsArray)
-				obj = MapArray(genericType, stream);
-			else if (genericType == typeof(BMSByte))
-				obj = MapBMSByte(stream);
-			else if (genericType.IsEnum)
-				obj = MapBasicType(Enum.GetUnderlyingType(genericType), stream);
-			else
-				obj = MapBasicType(genericType, stream);
-
-			return (T)obj;
+			return (T)Map(typeof(T), stream);
 		}
 
 		/// <summary>

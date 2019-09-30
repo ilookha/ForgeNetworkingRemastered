@@ -148,32 +148,24 @@ namespace BeardedManStudios.Forge.Managers
 			{
                 BMSLog.LogFormat("GameClient: VIEW_INITIALIZE");
 
-				int count = frame.StreamData.GetBasicType<int>();
+				int sceneId = frame.StreamData.GetBasicType<int>();
+				GameServer.ViewUpdateMode loadMode = (GameServer.ViewUpdateMode)frame.StreamData.GetBasicType<int>();
 
-                lock (NetworkObject.PendingCreatesLock)
+				lock (NetworkObject.PendingCreatesLock)
                 {
                     // We need to halt the creation of network objects until we load the scene
                     Networker.PendCreates = true;
 
                     loadingScenes.Clear();
-                    for (int i = 0; i < count; i++)
-                        loadingScenes.Add(frame.StreamData.GetBasicType<int>());
+                    loadingScenes.Add(sceneId);
                 }
 
-                int[] scenesToLoad = loadingScenes.ToArray();
-                if (scenesToLoad.Length > 0)
+                if (ResetSceneHandler != null)
                 {
-                    if (ResetSceneHandler != null)
+                    _mainThreadRunner.Execute(() =>
                     {
-                        _mainThreadRunner.Execute(() =>
-                        {
-                            ResetSceneHandler(scenesToLoad[0]);
-                            for (int i = 1; i < scenesToLoad.Length; ++i)
-                            {
-                                AddSceneHandler(scenesToLoad[i]);
-                            }
-                        });
-                    }
+                        ResetSceneHandler(sceneId);
+                    });
                 }
 
                 return;

@@ -179,8 +179,11 @@ public class CubeForgeGame : CubeForgeGameBehavior
 	{
 		if (NetworkManager.Instance != null)
 		{
-			NetworkManager.Instance.Networker.playerAccepted -= PlayerAccepted;
-			NetworkManager.Instance.Networker.onPingPong -= OnPingPong;
+			if (NetworkManager.Instance.Networker != null)
+			{
+				NetworkManager.Instance.Networker.playerAccepted -= PlayerAccepted;
+				NetworkManager.Instance.Networker.onPingPong -= OnPingPong;
+			}
 			NetworkManager.Instance.objectInitialized -= ObjectInitialized;
 		}
 

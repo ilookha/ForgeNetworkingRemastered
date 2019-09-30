@@ -7,17 +7,12 @@ namespace BeardedManStudios.Forge.Networking.Unity
 	{
 		private float x, y, z, w;
 
-		private new static UnityObjectMapper instance = null;
-		public static new UnityObjectMapper Instance
+		public static new void CreateInstance()
 		{
-			get
-			{
-				if (instance != null)
-					return instance;
+			if (Instance != null && Instance.GetType() != typeof(UnityObjectMapper))
+				throw new Exception("ObjectMapper instance already exists");
 
-				instance = new UnityObjectMapper();
-				return instance;
-			}
+			Instance = new UnityObjectMapper();
 		}
 
 		protected UnityObjectMapper() { }
@@ -42,29 +37,6 @@ namespace BeardedManStudios.Forge.Networking.Unity
 				obj = base.Map(type, stream);
 
 			return obj;
-		}
-
-		/// <summary>
-		/// Get a mapped value out of the FrameStream
-		/// </summary>
-		/// <typeparam name="T">Value to get out of it</typeparam>
-		/// <param name="stream">FrameStream to be used</param>
-		/// <returns>Returns a mapped value from the FrameStream</returns>
-		public override T Map<T>(BMSByte stream)
-		{
-			object obj = null;
-			var genericType = typeof(T);
-
-			if (genericType == typeof(Vector2))
-				obj = MapVector2(stream);
-			else if (genericType == typeof(Vector3))
-				obj = MapVector3(stream);
-			else if (genericType == typeof(Vector4) || genericType == typeof(Color) || genericType == typeof(Quaternion))
-				obj = MapVector4(genericType, stream);
-			else
-				obj = base.Map<T>(stream);
-
-			return (T)obj;
 		}
 
 		/// <summary>

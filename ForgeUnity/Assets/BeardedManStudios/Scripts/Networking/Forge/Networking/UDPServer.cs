@@ -143,7 +143,7 @@ namespace BeardedManStudios.Forge.Networking
 			Send(sendFrame, reliable, playerToIgnore);
 		}
 
-		public void Connect(string host = "0.0.0.0", ushort port = DEFAULT_PORT, string natHost = "", ushort natPort = NatHolePunch.DEFAULT_NAT_SERVER_PORT)
+		public void Connect(string host = "0.0.0.0", ushort port = DEFAULT_PORT, string natHost = "", ushort natPort = NatHolePunch.DEFAULT_NAT_SERVER_PORT, bool enableTimeouts = true)
 		{
 			if (Disposed)
 				throw new ObjectDisposedException("UDPServer", "This object has been disposed and can not be used to connect, please use a new UDPServer");
@@ -162,15 +162,18 @@ namespace BeardedManStudios.Forge.Networking
 				Task.Queue(ReadClients);
 
 				// Create the thread that will check for player timeouts
-				Task.Queue(() =>
+				if (enableTimeouts)
 				{
-					commonServerLogic.CheckClientTimeout((player) =>
+					Task.Queue(() =>
 					{
-						Disconnect(player, true);
-						OnPlayerTimeout(player);
-						CleanupDisconnections();
+						commonServerLogic.CheckClientTimeout((player) =>
+						{
+							Disconnect(player, true);
+							OnPlayerTimeout(player);
+							CleanupDisconnections();
+						});
 					});
-				});
+				}
 
 				// Let myself know I connected successfully
 				OnPlayerConnected(Me);
@@ -329,8 +332,10 @@ namespace BeardedManStudios.Forge.Networking
 
 					BandwidthIn += (ulong)packet.Size;
 				}
-				catch
+				catch (Exception exception)
 				{
+					Logging.BMSLog.LogException(exception);
+
 					UDPNetworkingPlayer player;
 					if (udpPlayers.TryGetValue(incomingEndpoint, out player))
 					{

@@ -95,11 +95,11 @@ namespace BeardedManStudios.Forge.Managers
             {
                 if (Settings.natServerHost.Trim().Length == 0)
                 {
-                    (Networker as UDPServer).Connect(string.Empty, Settings.gameServerPort);
+                    (Networker as UDPServer).Connect(host:string.Empty, port:Settings.gameServerPort, enableTimeouts:Settings.enableTimeouts);
                 }
                 else
                 {
-                    (Networker as UDPServer).Connect(port: Settings.gameServerPort, natHost: Settings.natServerHost, natPort: Settings.natServerPort);
+                    (Networker as UDPServer).Connect(port: Settings.gameServerPort, natHost: Settings.natServerHost, natPort: Settings.natServerPort, enableTimeouts: Settings.enableTimeouts);
                 }
             }
 

@@ -32,11 +32,6 @@ namespace BeardedManStudios.Forge.Managers
 		public NetworkSettings Settings;
 		public MasterServerResponse.Server ServerDescription;
 
-		/// <summary>
-		/// Internal flag to indicate that the Initialize method has been called.
-		/// </summary>
-		protected bool initialized;
-
         /// <summary>
         /// Provides engine-agnostic way of accessing network objects
         /// </summary>
@@ -260,8 +255,7 @@ namespace BeardedManStudios.Forge.Managers
 
         public virtual void OnSceneReset(int sceneId)
         {
-            // The NetworkManager has not yet been initialized with a Networker.
-            if (!initialized)
+            if (Networker == null)
                 return;
 
             // If we are loading a completely new scene then we will need
@@ -288,11 +282,10 @@ namespace BeardedManStudios.Forge.Managers
 
         public virtual void OnSceneAdded(int sceneId)
         {
-            // The NetworkManager has not yet been initialized with a Networker.
-            if (!initialized)
-                return;
+			if (Networker == null)
+				return;
 
-            lock (NetworkObject.PendingCreatesLock)
+			lock (NetworkObject.PendingCreatesLock)
             {
                 loadingScenes.Remove(sceneId);
             }
@@ -313,11 +306,10 @@ namespace BeardedManStudios.Forge.Managers
         /// <param name="scene"></param>
         public virtual void OnSceneRemoved(int sceneId)
         {
-            // The NetworkManager has not yet been initialized with a Networker.
-            if (!initialized)
-                return;
+			if (Networker == null)
+				return;
 
-            loadedScenes.Remove(sceneId);
+			loadedScenes.Remove(sceneId);
 
             // Notify the server
             BMSByte data = ObjectMapper.BMSByte(sceneId, (int)GameServer.ViewUpdateMode.Remove);
